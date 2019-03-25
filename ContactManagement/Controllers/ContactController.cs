@@ -18,9 +18,9 @@ namespace ContactManagement.Controllers
         private List<ContactModel> _contactModelList;
         public enum ValidateMode
         {
-            NAME=1,
-            MOBILE =2,
-            EMAIL =3
+            NAME = 1,
+            MOBILE = 2,
+            EMAIL = 3
         }
         #endregion
 
@@ -61,125 +61,119 @@ namespace ContactManagement.Controllers
         {
             try
             {
-                //Validating the firstname and  last is exist
-                if (Validate(contactModel, ValidateMode.NAME))
+                if (Validate(contactModel, ValidateMode.MOBILE))
                 {
-                    if (Validate(contactModel, ValidateMode.MOBILE))
+                    if (Validate(contactModel, ValidateMode.EMAIL))
                     {
-                        if (Validate(contactModel, ValidateMode.EMAIL))
+                        /* if ContactId is 0 - New contact - Insert 
+                           if ContactId is NOT 0 - Existing contact -Update*/
+                        if (contactModel != null)
                         {
-                            /* if ContactId is 0 - New contact - Insert 
-                               if ContactId is NOT 0 - Existing contact -Update*/
-                            if (contactModel != null)
+                            //Getting the existing contact details 
+                            var _contact = addressBookEntities.Contacts.Find(contactModel.ContactId);
+                            if (_contact != null)
                             {
-                                //Getting the existing contact details 
-                                var _contact = addressBookEntities.Contacts.Find(contactModel.ContactId);
-                                if (_contact != null)
+                                //Assigning the values to the existing contact object
+                                _contact.FirstName = contactModel.FirstName;
+                                _contact.LastName = contactModel.LastName;
+                                _contact.ModifiedOn = DateTime.Now;
+                                addressBookEntities.Entry(_contact).State = EntityState.Modified;
+
+                                //if any existing contact number is removed then the status will be Deleted                        
+                                foreach (var item in _contact.ContactMobiles.Where(x => x.StatusId == (int)StatusHelper.Active && !contactModel.contactMobileList.Any(m => m.MobileNumber == x.MobileNumber)).ToList())
                                 {
-                                    //Assigning the values to the existing contact object
-                                    _contact.FirstName = contactModel.FirstName;
-                                    _contact.LastName = contactModel.LastName;
-                                    _contact.ModifiedOn = DateTime.Now;
-                                    addressBookEntities.Entry(_contact).State = EntityState.Modified;
-
-                                    //if any existing contact number is removed then the status will be Deleted                        
-                                    foreach (var item in _contact.ContactMobiles.Where(x => x.StatusId == (int)StatusHelper.Active && !contactModel.contactMobileList.Any(m => m.MobileNumber == x.MobileNumber)).ToList())
-                                    {
-                                        item.StatusId = (int)StatusHelper.Deleted;
-                                        item.ModifiedOn = DateTime.Now;
-                                        addressBookEntities.Entry(item).State = EntityState.Modified;
-                                    }
-                                    //if any existing email is removed then the status will be Deleted                        
-                                    foreach (var item in _contact.ContactEmails.Where(x => x.StatusId == (int)StatusHelper.Active && !contactModel.contactEmailList.Any(m => m.EmailAddress == x.EmailAddress)).ToList())
-                                    {
-                                        item.StatusId = (int)StatusHelper.Deleted;
-                                        item.ModifiedOn = DateTime.Now;
-                                        addressBookEntities.Entry(item).State = EntityState.Modified;
-                                    }
-                                    //Creating new mobile entries
-                                    foreach (var item in contactModel.contactMobileList.Where(x => !_contact.ContactMobiles.Any(m => m.StatusId == (int)StatusHelper.Active && m.MobileNumber == x.MobileNumber)).ToList())
-                                    {
-                                        addressBookEntities.ContactMobiles.Add(new ContactMobile
-                                        {
-                                            ContactId = _contact.ContactId,
-                                            MobileNumber = item.MobileNumber.ToString(),
-                                            StatusId = (int)StatusHelper.Active,
-                                            CreatedOn = DateTime.Now,
-                                            ModifiedOn = DateTime.Now
-                                        });
-                                    }
-
-                                    //Creating new email entries
-                                    foreach (var item in contactModel.contactEmailList.Where(x => !_contact.ContactEmails.Any(m => m.StatusId == (int)StatusHelper.Active && m.EmailAddress == x.EmailAddress)).ToList())
-                                    {
-                                        addressBookEntities.ContactEmails.Add(new ContactEmail
-                                        {
-                                            ContactId = _contact.ContactId,
-                                            EmailAddress = item.EmailAddress.ToString(),
-                                            StatusId = (int)StatusHelper.Active,
-                                            CreatedOn = DateTime.Now,
-                                            ModifiedOn = DateTime.Now
-                                        });
-                                    }
-                                    addressBookEntities.SaveChanges();
-                                    return ResponseResult(null, MessageHelper.ContactUpdateMessage);
+                                    item.StatusId = (int)StatusHelper.Deleted;
+                                    item.ModifiedOn = DateTime.Now;
+                                    addressBookEntities.Entry(item).State = EntityState.Modified;
                                 }
-                                else
+                                //if any existing email is removed then the status will be Deleted                        
+                                foreach (var item in _contact.ContactEmails.Where(x => x.StatusId == (int)StatusHelper.Active && !contactModel.contactEmailList.Any(m => m.EmailAddress == x.EmailAddress)).ToList())
                                 {
-                                    // Creating New Contact
-                                    Contact contact = new Contact();
-                                    //Assigning the values to the contact object
-                                    contact.FirstName = contactModel.FirstName;
-                                    contact.LastName = contactModel.LastName;
-                                    contact.StatusId = (int)StatusHelper.Active;
-                                    contact.CreatedOn = contact.ModifiedOn = DateTime.Now;
-                                    addressBookEntities.Contacts.Add(contact);
-                                    addressBookEntities.SaveChanges();
-                                    //Creating new mobile entries
-                                    foreach (var item in contactModel.contactMobileList.Where(x => x.MobileNumber != string.Empty))
+                                    item.StatusId = (int)StatusHelper.Deleted;
+                                    item.ModifiedOn = DateTime.Now;
+                                    addressBookEntities.Entry(item).State = EntityState.Modified;
+                                }
+                                //Creating new mobile entries
+                                foreach (var item in contactModel.contactMobileList.Where(x => !_contact.ContactMobiles.Any(m => m.StatusId == (int)StatusHelper.Active && m.MobileNumber == x.MobileNumber)).ToList())
+                                {
+                                    addressBookEntities.ContactMobiles.Add(new ContactMobile
                                     {
-                                        addressBookEntities.ContactMobiles.Add(new ContactMobile
-                                        {
-                                            ContactId = contact.ContactId,
-                                            MobileNumber = item.MobileNumber.ToString(),
-                                            StatusId = (int)StatusHelper.Active,
-                                            CreatedOn = DateTime.Now
-                                        });
-                                    }
-                                    //Creating new email entries
-                                    foreach (var item in contactModel.contactEmailList.Where(x => x.EmailAddress != string.Empty))
-                                    {
-                                        addressBookEntities.ContactEmails.Add(new ContactEmail
-                                        {
-                                            ContactId = contact.ContactId,
-                                            EmailAddress = item.EmailAddress.ToString(),
-                                            StatusId = (int)StatusHelper.Active,
-                                            CreatedOn = DateTime.Now
-                                        });
-                                    }
-                                    addressBookEntities.SaveChanges();
-                                    return ResponseResult(null, MessageHelper.ContactSaveMessage);
+                                        ContactId = _contact.ContactId,
+                                        MobileNumber = item.MobileNumber.ToString(),
+                                        StatusId = (int)StatusHelper.Active,
+                                        CreatedOn = DateTime.Now,
+                                        ModifiedOn = DateTime.Now
+                                    });
                                 }
 
+                                //Creating new email entries
+                                foreach (var item in contactModel.contactEmailList.Where(x => !_contact.ContactEmails.Any(m => m.StatusId == (int)StatusHelper.Active && m.EmailAddress == x.EmailAddress)).ToList())
+                                {
+                                    addressBookEntities.ContactEmails.Add(new ContactEmail
+                                    {
+                                        ContactId = _contact.ContactId,
+                                        EmailAddress = item.EmailAddress.ToString(),
+                                        StatusId = (int)StatusHelper.Active,
+                                        CreatedOn = DateTime.Now,
+                                        ModifiedOn = DateTime.Now
+                                    });
+                                }
+                                addressBookEntities.SaveChanges();
+                                return ResponseResult(null, MessageHelper.ContactUpdateMessage);
                             }
                             else
                             {
-                                return ResponseResult(null, MessageHelper.ErrorMessage, MessageCode.ERROR);
+                                // Creating New Contact
+                                Contact contact = new Contact();
+                                //Assigning the values to the contact object
+                                contact.FirstName = contactModel.FirstName;
+                                contact.LastName = contactModel.LastName;
+                                contact.StatusId = (int)StatusHelper.Active;
+                                contact.CreatedOn = contact.ModifiedOn = DateTime.Now;
+                                addressBookEntities.Contacts.Add(contact);
+                                addressBookEntities.SaveChanges();
+                                //Creating new mobile entries
+                                foreach (var item in contactModel.contactMobileList.Where(x => x.MobileNumber != string.Empty))
+                                {
+                                    addressBookEntities.ContactMobiles.Add(new ContactMobile
+                                    {
+                                        ContactId = contact.ContactId,
+                                        MobileNumber = item.MobileNumber.ToString(),
+                                        StatusId = (int)StatusHelper.Active,
+                                        CreatedOn = DateTime.Now
+                                    });
+                                }
+                                //Creating new email entries
+                                foreach (var item in contactModel.contactEmailList.Where(x => x.EmailAddress != string.Empty))
+                                {
+                                    addressBookEntities.ContactEmails.Add(new ContactEmail
+                                    {
+                                        ContactId = contact.ContactId,
+                                        EmailAddress = item.EmailAddress.ToString(),
+                                        StatusId = (int)StatusHelper.Active,
+                                        CreatedOn = DateTime.Now
+                                    });
+                                }
+                                addressBookEntities.SaveChanges();
+                                return ResponseResult(null, MessageHelper.ContactSaveMessage);
                             }
+
                         }
                         else
                         {
-                            return ResponseResult(null, MessageHelper.ContactEmailAlreadyExists, MessageCode.ERROR);
+                            return ResponseResult(null, MessageHelper.ErrorMessage, MessageCode.ERROR);
                         }
                     }
-                    else {
-                        return ResponseResult(null, MessageHelper.ContactMobileAlreadyExists, MessageCode.ERROR);
+                    else
+                    {
+                        return ResponseResult(null, MessageHelper.ContactEmailAlreadyExists, MessageCode.ERROR);
                     }
                 }
                 else
                 {
-                    return ResponseResult(null, MessageHelper.ContactAlreadyExistsMessage, MessageCode.ERROR);
+                    return ResponseResult(null, MessageHelper.ContactMobileAlreadyExists, MessageCode.ERROR);
                 }
+
             }
             catch (Exception)
             {
@@ -239,7 +233,7 @@ namespace ContactManagement.Controllers
         /// <param name="contactModel"></param>
         /// <returns></returns>
         [NonAction]
-        public bool Validate(ContactModel contactModel,ValidateMode validateMode)
+        public bool Validate(ContactModel contactModel, ValidateMode validateMode)
         {
 
             try
@@ -247,10 +241,6 @@ namespace ContactManagement.Controllers
                 //message based on the where condition
                 switch (validateMode)
                 {
-                    case ValidateMode.NAME:
-                        return !addressBookEntities.Contacts.Any(x =>
-                                            x.FirstName.ToLower() + x.LastName.ToLower() == contactModel.FirstName.ToLower() + contactModel.LastName.ToLower()
-                                            && x.ContactId != contactModel.ContactId && x.StatusId == (int)StatusHelper.Active);
                     case ValidateMode.MOBILE:
                         var isMobileAvailable = addressBookEntities.ContactMobiles.ToList().Where(x => x.StatusId == (int)StatusHelper.Active && x.ContactId != contactModel.ContactId && contactModel.contactMobileList.Any(m => m.MobileNumber == x.MobileNumber)).ToList();
 
@@ -275,7 +265,7 @@ namespace ContactManagement.Controllers
 
                 return false;
             }
-            
+
         }
 
         /// <summary>
@@ -323,10 +313,11 @@ namespace ContactManagement.Controllers
         /// <param name="mobileNumber">Mobile Number</param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult ValidateMobile(int contactId, string mobileNumber) {
+        public ActionResult ValidateMobile(int contactId, string mobileNumber)
+        {
             try
             {
-                if (addressBookEntities.ContactMobiles.Any(x => x.MobileNumber == mobileNumber &&  x.ContactId != (contactId == 0 ? 0 : contactId) && x.StatusId == (int)StatusHelper.Active))
+                if (addressBookEntities.ContactMobiles.Any(x => x.MobileNumber == mobileNumber && x.ContactId != (contactId == 0 ? 0 : contactId) && x.StatusId == (int)StatusHelper.Active))
                 {
                     return ResponseResult(null, MessageHelper.ContactMobileAlreadyExists, MessageCode.ERROR);
                 }
