@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="AddressBookModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="ContactEmail">
+    <Key>
+      <PropertyRef Name="ContactEmailId" />
+    </Key>
+    <Property Name="ContactEmailId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="ContactId" Type="int" />
+    <Property Name="EmailAddress" Type="varchar" MaxLength="50" />
+    <Property Name="StatusId" Type="int" />
+    <Property Name="CreatedOn" Type="datetime" />
+    <Property Name="ModifiedOn" Type="datetime" />
+  </EntityType>
+  <EntityType Name="ContactMobile">
+    <Key>
+      <PropertyRef Name="ContactMobileId" />
+    </Key>
+    <Property Name="ContactMobileId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="ContactId" Type="int" />
+    <Property Name="MobileNumber" Type="varchar" MaxLength="20" />
+    <Property Name="StatusId" Type="int" />
+    <Property Name="CreatedOn" Type="datetime" />
+    <Property Name="ModifiedOn" Type="datetime" />
+  </EntityType>
+  <EntityType Name="Contacts">
+    <Key>
+      <PropertyRef Name="ContactId" />
+    </Key>
+    <Property Name="ContactId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="FirstName" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="LastName" Type="varchar" MaxLength="50" />
+    <Property Name="CreatedOn" Type="datetime" />
+    <Property Name="ModifiedOn" Type="datetime" />
+    <Property Name="StatusId" Type="int" />
+  </EntityType>
+  <Association Name="FK__ContactEm__Conta__6E01572D">
+    <End Role="Contacts" Type="Self.Contacts" Multiplicity="0..1" />
+    <End Role="ContactEmail" Type="Self.ContactEmail" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Contacts">
+        <PropertyRef Name="ContactId" />
+      </Principal>
+      <Dependent Role="ContactEmail">
+        <PropertyRef Name="ContactId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK__ContactMo__Conta__619B8048">
+    <End Role="Contacts" Type="Self.Contacts" Multiplicity="0..1" />
+    <End Role="ContactMobile" Type="Self.ContactMobile" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Contacts">
+        <PropertyRef Name="ContactId" />
+      </Principal>
+      <Dependent Role="ContactMobile">
+        <PropertyRef Name="ContactId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="AddressBookModelStoreContainer">
+    <EntitySet Name="ContactEmail" EntityType="Self.ContactEmail" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ContactMobile" EntityType="Self.ContactMobile" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="Contacts" EntityType="Self.Contacts" Schema="dbo" store:Type="Tables" />
+    <AssociationSet Name="FK__ContactEm__Conta__6E01572D" Association="Self.FK__ContactEm__Conta__6E01572D">
+      <End Role="Contacts" EntitySet="Contacts" />
+      <End Role="ContactEmail" EntitySet="ContactEmail" />
+    </AssociationSet>
+    <AssociationSet Name="FK__ContactMo__Conta__619B8048" Association="Self.FK__ContactMo__Conta__619B8048">
+      <End Role="Contacts" EntitySet="Contacts" />
+      <End Role="ContactMobile" EntitySet="ContactMobile" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

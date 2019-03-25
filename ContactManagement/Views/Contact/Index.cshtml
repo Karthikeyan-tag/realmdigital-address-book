@@ -1,0 +1,170 @@
+﻿@model List<ContactManagement.ViewModel.ContactModel>
+@{
+    ViewBag.Title = "Address Book";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" />
+<link href="/Content/sweetalert.css" rel="stylesheet" />
+
+<div class="container" style="margin-top: 10%;">
+    <div class="table-wrapper">
+        <div class="table-title">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2>Manage Contacts</h2>
+                </div>
+                <div class="col-sm-6">
+                    <a href="#addContactModal" class="btn btn-success" data-toggle="modal" onclick="$('#addEditContact').html('Add Contact'); $('#hdnContactId').val('');clearInputFields()"><i class="material-icons">&#xE147;</i> <span>Add New Contact</span></a>
+                </div>
+            </div>
+        </div>
+        <table class="table table-striped table-hover" id="tblContact" width="100%">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th style="display:none;">ContactId</th>
+                    <th style="display:none;">Mobile</th>
+                    <th style="display:none;">Email ID</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="addContactModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width:500px;">
+            <input type="hidden" id="hdnContactId" />
+            <div class="modal-header">
+                <h4 class="modal-title" id="addEditContact">Add New Contact</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" class="form-control clr" maxlength="50" name="FirstName" placeholder="First Name" required id="firstName">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" class="form-control clr" maxlength="50" name="LastName" placeholder="Last Name" id="lastName">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Mobile</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control mobile number clr" data-call="mobile" placeholder="Ex-0123456789" maxlength="10" data-role="tagsinput" id="firstMobileNumber" >                           
+                            <span class="input-group-btn" style="cursor:pointer">
+                                <i class="material-icons success" onclick="validateMobile($('.mobile').val(),true)">&#xE147;</i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Email ID</label>
+                        <div class="input-group">
+                            <input type="email" class="form-control email mail clr" data-call="email" maxlength="50" name="EmailAddress" placeholder="Enter email address" id="firstEmailAddress">
+                            <span class="input-group-btn" style="cursor:pointer">
+                                <i class="material-icons success" onclick="checkEmailAddressinDataBase($('.email'),true)">&#xE147;</i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mobileContainer clr">
+                    </div>
+                    <div class="col-md-6 emailContainer clr">
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                <input type="button" class="btn btn-success" value="Save" id="btnAdd" onclick="SaveContact()">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Viwe Modal -->
+<div id="viewEmailMobileModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form>
+                <div class="modal-header">
+                    <h4 class="modal-title" id="viewType"></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body" id="viewemailmobilebody">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script src="/Scripts/sweetalert.min.js"></script>
+<script src="/Scripts/datatables.js"></script>
+<script src="~/Scripts/addressbook.js"></script>
+
+<script>
+    //On Load To bind the grid data
+    $(document).ready(function () {
+        //Valiate mobile text box to enter only number
+        $(document).on("keypress", "input.number", function (e) {
+            if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+                return false;
+            }
+        });
+        $(document).on("keyup", "input.mail", function (e) {
+            
+            validateEmail(this);
+        });       
+
+        $(document).on("keyup", "input.number", function (e) {
+            var _mobileNumber = $(this).val();
+            if (_mobileNumber != '') {
+                if (_mobileNumber.charAt(0) != '0' || _mobileNumber.length!=10) {
+                    $(this).css("border", "1px Red solid");
+                }
+                else
+                    $(this).removeAttr("style");
+            }
+            else
+                $(this).removeAttr("style");
+        });
+
+        $(document).bind("cut copy paste", function (e) {
+            e.preventDefault();
+        });
+
+        //Bind the Grid
+        getContact(0, CALLFOR.TABLE);
+    });
+
+    //Validate Email while saving
+    function validateEmail(e) {       
+        var _emailAddress = $(e).val();       
+        var _regexEmail = /^[A-Z0-9._%+-]+@@([A-Z0-9-]+\.)+[A-Z]{2,4}$/i;
+        if (!_emailAddress.match(_regexEmail) && _emailAddress != '') {
+            $(e).css("border", "1px Red solid");
+            return false;
+        }
+        else {
+            $(e).removeAttr("style");
+            return true;
+        }
+    }
+</script>
+
+
+

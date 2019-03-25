@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="AddressBookModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityContainer Name="AddressBookEntities" annotation:LazyLoadingEnabled="true">
+    <FunctionImport Name="sp_AddUpdateDeleteContact" ReturnType="Collection(String)">
+      <Parameter Name="ContactId" Mode="In" Type="Int32" />
+      <Parameter Name="FirstName" Mode="In" Type="String" />
+      <Parameter Name="LastName" Mode="In" Type="String" />
+      <Parameter Name="MobileNumber" Mode="In" Type="String" />
+      <Parameter Name="EmailAddress" Mode="In" Type="String" />
+      <Parameter Name="Type" Mode="In" Type="String" />
+    </FunctionImport>
+    <FunctionImport Name="sp_GetAllContacts" ReturnType="Collection(AddressBookModel.sp_GetAllContacts_Result)" />
+    <FunctionImport Name="sp_GetContactById" ReturnType="Collection(AddressBookModel.sp_GetContactById_Result)">
+      <Parameter Name="ContactId" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <EntitySet Name="ContactEmails" EntityType="AddressBookModel.ContactEmail" />
+    <EntitySet Name="ContactMobiles" EntityType="AddressBookModel.ContactMobile" />
+    <EntitySet Name="Contacts" EntityType="AddressBookModel.Contact" />
+    <AssociationSet Name="FK__ContactEm__Conta__6E01572D" Association="AddressBookModel.FK__ContactEm__Conta__6E01572D">
+      <End Role="Contact" EntitySet="Contacts" />
+      <End Role="ContactEmail" EntitySet="ContactEmails" />
+    </AssociationSet>
+    <AssociationSet Name="FK__ContactMo__Conta__619B8048" Association="AddressBookModel.FK__ContactMo__Conta__619B8048">
+      <End Role="Contact" EntitySet="Contacts" />
+      <End Role="ContactMobile" EntitySet="ContactMobiles" />
+    </AssociationSet>
+  </EntityContainer>
+  <ComplexType Name="sp_GetAllContacts_Result">
+    <Property Type="String" Name="FirstName" Nullable="false" MaxLength="100" />
+    <Property Type="String" Name="LastName" Nullable="false" MaxLength="100" />
+    <Property Type="Int32" Name="ContactId" Nullable="false" />
+  </ComplexType>
+  <ComplexType Name="sp_GetContactById_Result">
+    <Property Type="String" Name="FirstName" Nullable="false" MaxLength="100" />
+    <Property Type="String" Name="LastName" Nullable="false" MaxLength="100" />
+  </ComplexType>
+  <EntityType Name="ContactEmail">
+    <Key>
+      <PropertyRef Name="ContactEmailId" />
+    </Key>
+    <Property Name="ContactEmailId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="ContactId" Type="Int32" />
+    <Property Name="EmailAddress" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="StatusId" Type="Int32" />
+    <Property Name="CreatedOn" Type="DateTime" Precision="3" />
+    <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+    <NavigationProperty Name="Contact" Relationship="AddressBookModel.FK__ContactEm__Conta__6E01572D" FromRole="ContactEmail" ToRole="Contact" />
+  </EntityType>
+  <EntityType Name="ContactMobile">
+    <Key>
+      <PropertyRef Name="ContactMobileId" />
+    </Key>
+    <Property Name="ContactMobileId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="ContactId" Type="Int32" />
+    <Property Name="MobileNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+    <Property Name="StatusId" Type="Int32" />
+    <Property Name="CreatedOn" Type="DateTime" Precision="3" />
+    <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+    <NavigationProperty Name="Contact" Relationship="AddressBookModel.FK__ContactMo__Conta__619B8048" FromRole="ContactMobile" ToRole="Contact" />
+  </EntityType>
+  <EntityType Name="Contact">
+    <Key>
+      <PropertyRef Name="ContactId" />
+    </Key>
+    <Property Name="ContactId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="FirstName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="LastName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="CreatedOn" Type="DateTime" Precision="3" />
+    <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+    <Property Name="StatusId" Type="Int32" />
+    <NavigationProperty Name="ContactEmails" Relationship="AddressBookModel.FK__ContactEm__Conta__6E01572D" FromRole="Contact" ToRole="ContactEmail" />
+    <NavigationProperty Name="ContactMobiles" Relationship="AddressBookModel.FK__ContactMo__Conta__619B8048" FromRole="Contact" ToRole="ContactMobile" />
+  </EntityType>
+  <Association Name="FK__ContactEm__Conta__6E01572D">
+    <End Type="AddressBookModel.Contact" Role="Contact" Multiplicity="0..1" />
+    <End Type="AddressBookModel.ContactEmail" Role="ContactEmail" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Contact">
+        <PropertyRef Name="ContactId" />
+      </Principal>
+      <Dependent Role="ContactEmail">
+        <PropertyRef Name="ContactId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK__ContactMo__Conta__619B8048">
+    <End Type="AddressBookModel.Contact" Role="Contact" Multiplicity="0..1" />
+    <End Type="AddressBookModel.ContactMobile" Role="ContactMobile" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Contact">
+        <PropertyRef Name="ContactId" />
+      </Principal>
+      <Dependent Role="ContactMobile">
+        <PropertyRef Name="ContactId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>

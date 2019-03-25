@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="80550588c93d4611a5df279ad77fb08b" Name="Diagram1">
+        <EntityTypeShape EntityType="AddressBookModel.ContactEmail" Width="1.5" PointX="3" PointY="1.125" />
+        <EntityTypeShape EntityType="AddressBookModel.ContactMobile" Width="1.5" PointX="3" PointY="4.25" />
+        <EntityTypeShape EntityType="AddressBookModel.Contact" Width="1.5" PointX="0.75" PointY="2.5" />
+        <AssociationConnector Association="AddressBookModel.FK__ContactEm__Conta__6E01572D" />
+        <AssociationConnector Association="AddressBookModel.FK__ContactMo__Conta__619B8048" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

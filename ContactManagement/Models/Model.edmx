@@ -1,0 +1,242 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="AddressBookModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="ContactEmail">
+          <Key>
+            <PropertyRef Name="ContactEmailId" />
+          </Key>
+          <Property Name="ContactEmailId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ContactId" Type="int" />
+          <Property Name="EmailAddress" Type="varchar" MaxLength="50" />
+          <Property Name="StatusId" Type="int" />
+          <Property Name="CreatedOn" Type="datetime" />
+          <Property Name="ModifiedOn" Type="datetime" />
+        </EntityType>
+        <EntityType Name="ContactMobile">
+          <Key>
+            <PropertyRef Name="ContactMobileId" />
+          </Key>
+          <Property Name="ContactMobileId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ContactId" Type="int" />
+          <Property Name="MobileNumber" Type="varchar" MaxLength="20" />
+          <Property Name="StatusId" Type="int" />
+          <Property Name="CreatedOn" Type="datetime" />
+          <Property Name="ModifiedOn" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Contacts">
+          <Key>
+            <PropertyRef Name="ContactId" />
+          </Key>
+          <Property Name="ContactId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="FirstName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="LastName" Type="varchar" MaxLength="50" />
+          <Property Name="CreatedOn" Type="datetime" />
+          <Property Name="ModifiedOn" Type="datetime" />
+          <Property Name="StatusId" Type="int" />
+        </EntityType>
+        <Association Name="FK__ContactEm__Conta__6E01572D">
+          <End Role="Contacts" Type="Self.Contacts" Multiplicity="0..1" />
+          <End Role="ContactEmail" Type="Self.ContactEmail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contacts">
+              <PropertyRef Name="ContactId" />
+            </Principal>
+            <Dependent Role="ContactEmail">
+              <PropertyRef Name="ContactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ContactMo__Conta__619B8048">
+          <End Role="Contacts" Type="Self.Contacts" Multiplicity="0..1" />
+          <End Role="ContactMobile" Type="Self.ContactMobile" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contacts">
+              <PropertyRef Name="ContactId" />
+            </Principal>
+            <Dependent Role="ContactMobile">
+              <PropertyRef Name="ContactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="AddressBookModelStoreContainer">
+          <EntitySet Name="ContactEmail" EntityType="Self.ContactEmail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ContactMobile" EntityType="Self.ContactMobile" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Contacts" EntityType="Self.Contacts" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__ContactEm__Conta__6E01572D" Association="Self.FK__ContactEm__Conta__6E01572D">
+            <End Role="Contacts" EntitySet="Contacts" />
+            <End Role="ContactEmail" EntitySet="ContactEmail" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ContactMo__Conta__619B8048" Association="Self.FK__ContactMo__Conta__619B8048">
+            <End Role="Contacts" EntitySet="Contacts" />
+            <End Role="ContactMobile" EntitySet="ContactMobile" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="AddressBookModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="AddressBookEntities" annotation:LazyLoadingEnabled="true">
+          <FunctionImport Name="sp_AddUpdateDeleteContact" ReturnType="Collection(String)">
+            <Parameter Name="ContactId" Mode="In" Type="Int32" />
+            <Parameter Name="FirstName" Mode="In" Type="String" />
+            <Parameter Name="LastName" Mode="In" Type="String" />
+            <Parameter Name="MobileNumber" Mode="In" Type="String" />
+            <Parameter Name="EmailAddress" Mode="In" Type="String" />
+            <Parameter Name="Type" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="sp_GetAllContacts" ReturnType="Collection(AddressBookModel.sp_GetAllContacts_Result)" />
+          <FunctionImport Name="sp_GetContactById" ReturnType="Collection(AddressBookModel.sp_GetContactById_Result)">
+          <Parameter Name="ContactId" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <EntitySet Name="ContactEmails" EntityType="AddressBookModel.ContactEmail" />
+          <EntitySet Name="ContactMobiles" EntityType="AddressBookModel.ContactMobile" />
+          <EntitySet Name="Contacts" EntityType="AddressBookModel.Contact" />
+          <AssociationSet Name="FK__ContactEm__Conta__6E01572D" Association="AddressBookModel.FK__ContactEm__Conta__6E01572D">
+            <End Role="Contact" EntitySet="Contacts" />
+            <End Role="ContactEmail" EntitySet="ContactEmails" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ContactMo__Conta__619B8048" Association="AddressBookModel.FK__ContactMo__Conta__619B8048">
+            <End Role="Contact" EntitySet="Contacts" />
+            <End Role="ContactMobile" EntitySet="ContactMobiles" />
+          </AssociationSet>
+        </EntityContainer>
+        <ComplexType Name="sp_GetAllContacts_Result">
+          <Property Type="String" Name="FirstName" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="LastName" Nullable="false" MaxLength="100" />
+          <Property Type="Int32" Name="ContactId" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="sp_GetContactById_Result">
+          <Property Type="String" Name="FirstName" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="LastName" Nullable="false" MaxLength="100" />
+        </ComplexType>
+        <EntityType Name="ContactEmail">
+          <Key>
+            <PropertyRef Name="ContactEmailId" />
+          </Key>
+          <Property Name="ContactEmailId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ContactId" Type="Int32" />
+          <Property Name="EmailAddress" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="StatusId" Type="Int32" />
+          <Property Name="CreatedOn" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Contact" Relationship="AddressBookModel.FK__ContactEm__Conta__6E01572D" FromRole="ContactEmail" ToRole="Contact" />
+        </EntityType>
+        <EntityType Name="ContactMobile">
+          <Key>
+            <PropertyRef Name="ContactMobileId" />
+          </Key>
+          <Property Name="ContactMobileId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ContactId" Type="Int32" />
+          <Property Name="MobileNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="StatusId" Type="Int32" />
+          <Property Name="CreatedOn" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Contact" Relationship="AddressBookModel.FK__ContactMo__Conta__619B8048" FromRole="ContactMobile" ToRole="Contact" />
+        </EntityType>
+        <EntityType Name="Contact">
+          <Key>
+            <PropertyRef Name="ContactId" />
+          </Key>
+          <Property Name="ContactId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FirstName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="LastName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedOn" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+          <Property Name="StatusId" Type="Int32" />
+          <NavigationProperty Name="ContactEmails" Relationship="AddressBookModel.FK__ContactEm__Conta__6E01572D" FromRole="Contact" ToRole="ContactEmail" />
+          <NavigationProperty Name="ContactMobiles" Relationship="AddressBookModel.FK__ContactMo__Conta__619B8048" FromRole="Contact" ToRole="ContactMobile" />
+        </EntityType>
+        <Association Name="FK__ContactEm__Conta__6E01572D">
+          <End Type="AddressBookModel.Contact" Role="Contact" Multiplicity="0..1" />
+          <End Type="AddressBookModel.ContactEmail" Role="ContactEmail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contact">
+              <PropertyRef Name="ContactId" />
+            </Principal>
+            <Dependent Role="ContactEmail">
+              <PropertyRef Name="ContactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ContactMo__Conta__619B8048">
+          <End Type="AddressBookModel.Contact" Role="Contact" Multiplicity="0..1" />
+          <End Type="AddressBookModel.ContactMobile" Role="ContactMobile" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contact">
+              <PropertyRef Name="ContactId" />
+            </Principal>
+            <Dependent Role="ContactMobile">
+              <PropertyRef Name="ContactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="AddressBookModelStoreContainer" CdmEntityContainer="AddressBookEntities">
+          <EntitySetMapping Name="ContactEmails">
+            <EntityTypeMapping TypeName="AddressBookModel.ContactEmail">
+              <MappingFragment StoreEntitySet="ContactEmail">
+                <ScalarProperty Name="ModifiedOn" ColumnName="ModifiedOn" />
+                <ScalarProperty Name="CreatedOn" ColumnName="CreatedOn" />
+                <ScalarProperty Name="StatusId" ColumnName="StatusId" />
+                <ScalarProperty Name="EmailAddress" ColumnName="EmailAddress" />
+                <ScalarProperty Name="ContactId" ColumnName="ContactId" />
+                <ScalarProperty Name="ContactEmailId" ColumnName="ContactEmailId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ContactMobiles">
+            <EntityTypeMapping TypeName="AddressBookModel.ContactMobile">
+              <MappingFragment StoreEntitySet="ContactMobile">
+                <ScalarProperty Name="ModifiedOn" ColumnName="ModifiedOn" />
+                <ScalarProperty Name="CreatedOn" ColumnName="CreatedOn" />
+                <ScalarProperty Name="StatusId" ColumnName="StatusId" />
+                <ScalarProperty Name="MobileNumber" ColumnName="MobileNumber" />
+                <ScalarProperty Name="ContactId" ColumnName="ContactId" />
+                <ScalarProperty Name="ContactMobileId" ColumnName="ContactMobileId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Contacts">
+            <EntityTypeMapping TypeName="AddressBookModel.Contact">
+              <MappingFragment StoreEntitySet="Contacts">
+                <ScalarProperty Name="StatusId" ColumnName="StatusId" />
+                <ScalarProperty Name="ModifiedOn" ColumnName="ModifiedOn" />
+                <ScalarProperty Name="CreatedOn" ColumnName="CreatedOn" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="ContactId" ColumnName="ContactId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
